@@ -64,10 +64,21 @@ export default function RestaurantCard({ restaurant }: RestaurantCardProps) {
           📍 {restaurant.address}
         </p>
 
-        {/* TODO: Workshop Exercise 1 - Add opening hours display */}
-        {/* The data includes openingHours and closingHours fields */}
-        {/* Display them here with appropriate formatting */}
-        {/* Consider showing "Open Now" or "Closed" status */}
+        {/* Opening Hours Display */}
+        <div className="mb-2 flex items-center gap-2">
+          <span className="text-sm text-gray-600">
+            🕒 {formatTime(restaurant.openingHours)} - {formatTime(restaurant.closingHours)}
+          </span>
+          {isOpenNow(restaurant.openingHours, restaurant.closingHours) ? (
+            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
+              Open Now
+            </span>
+          ) : (
+            <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">
+              Closed
+            </span>
+          )}
+        </div>
 
         <p className="text-sm text-gray-500 line-clamp-2">{restaurant.description}</p>
 
@@ -108,4 +119,28 @@ function getCuisineEmoji(cuisine: string): string {
   };
 
   return cuisineEmojis[cuisine] || '🍽️';
+}
+
+// Helper function to format time from 24-hour to 12-hour format
+function formatTime(time: string): string {
+  const [hours, minutes] = time.split(':').map(Number);
+  const period = hours >= 12 ? 'PM' : 'AM';
+  const displayHours = hours % 12 || 12;
+  return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
+}
+
+// Helper function to check if restaurant is open now
+function isOpenNow(openingHours: string, closingHours: string): boolean {
+  const now = new Date();
+  const currentHours = now.getHours();
+  const currentMinutes = now.getMinutes();
+  const currentTimeInMinutes = currentHours * 60 + currentMinutes;
+
+  const [openHours, openMinutes] = openingHours.split(':').map(Number);
+  const openTimeInMinutes = openHours * 60 + openMinutes;
+
+  const [closeHours, closeMinutes] = closingHours.split(':').map(Number);
+  const closeTimeInMinutes = closeHours * 60 + closeMinutes;
+
+  return currentTimeInMinutes >= openTimeInMinutes && currentTimeInMinutes < closeTimeInMinutes;
 }
